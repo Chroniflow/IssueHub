@@ -1,0 +1,96 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { confirmPasswordReset, getApiErrorMessage, requestPasswordReset } from '@/api/http'
+
+const route = useRoute()
+const router = useRouter()
+const password = ref('')
+const confirmPassword = ref('')
+const usernameOrEmail = ref('')
+const message = ref('')
+const error = ref('')
+const submitting = ref(false)
+const token = typeof route.query.token === 'string' ? route.query.token : ''
+
+async function submit() {
+  error.value = ''
+  message.value = ''
+  if (token && password.value.length < 8) {
+    error.value = '新密码长度必须为 8-128 个字符。'
+    return
+  }
+  if (token && password.value.length > 128) {
+    error.value = '新密码长度必须为 8-128 个字符。'
+    return
+  }
+  if (token && password.value !== confirmPassword.value) {
+    error.value = '两次输入的新密码不一致。'
+    return
+  }
+  if (!token && !usernameOrEmail.value.trim()) {
+    error.value = '请输入用户名或邮箱。'
+    return
+  }
+  submitting.value = true
+  try {
+    const result = token
+      ? await confirmPasswordReset(token, password.value)
+      : await requestPasswordReset(usernameOrEmail.value.trim())
+    message.value = result.message
+    password.value = ''
+    confirmPassword.value = ''
+    usernameOrEmail.value = ''
+  } catch (requestError: unknown) {
+    error.value = getApiErrorMessage(
+      requestError,
+      token ? '重置链接无效或已过期，请重新申请。' : '请求失败，请稍后重试。',
+    )
+  } finally {
+    submitting.value = false
+  }
+}
+</script>
+
+<template>
+  <main class="form-page compact">
+    <button v-ripple class="back-link" @click="router.push('/login')">← 返回登录</button>
+    <section class="form-panel">
+      <p class="eyebrow">PLAYER ACCOUNT</p>
+      <h1>{{ token ? '重置密码' : '找回密码' }}</h1>
+      <p class="form-lede">
+        {{ token ? '设置新的登录密码。' : '输入用户名或邮箱，我们会发送重置链接。' }}
+      </p>
+      <form @submit.prevent="submit">
+        <label v-if="!token"
+          >用户名或邮箱<input v-model="usernameOrEmail" maxlength="254" autocomplete="username" required
+        /></label>
+        <template v-else>
+          <label
+            >新密码<input
+              v-model="password"
+              type="password"
+              autocomplete="new-password"
+              minlength="8"
+              maxlength="128"
+              required
+          /></label>
+          <label
+            >确认新密码<input
+              v-model="confirmPassword"
+              type="password"
+              autocomplete="new-password"
+              minlength="8"
+              maxlength="128"
+              required
+          /></label>
+        </template>
+        <p v-if="error" class="form-error" role="alert">{{ error }}</p>
+        <p v-if="message" class="form-message" role="status">{{ message }}</p>
+        <button v-ripple class="primary-button" type="submit" :disabled="submitting">
+          {{ submitting ? '提交中…' : token ? '重置密码' : '发送重置链接' }}
+        </button>
+      </form>
+    </section>
+  </main>
+</template>

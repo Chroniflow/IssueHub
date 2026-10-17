@@ -1,0 +1,14 @@
+/Users/chroniflow/Data/400-ExternalProjects/430-SimpMC/433-SimpIssueHub/Backend/src/test/java/com/simpissuehub/api/ApiSecurityIntegrationTest.java
+/Users/chroniflow/Data/400-ExternalProjects/430-SimpMC/433-SimpIssueHub/Backend/src/test/java/com/simpissuehub/api/IssueImageControllerTest.java
+/Users/chroniflow/Data/400-ExternalProjects/430-SimpMC/433-SimpIssueHub/Backend/src/test/java/com/simpissuehub/api/PollAuthorizationTest.java
+/Users/chroniflow/Data/400-ExternalProjects/430-SimpMC/433-SimpIssueHub/Backend/src/test/java/com/simpissuehub/application/AuthorizationServiceTest.java
+/Users/chroniflow/Data/400-ExternalProjects/430-SimpMC/433-SimpIssueHub/Backend/src/test/java/com/simpissuehub/application/IssueAttachmentServiceTest.java
+/Users/chroniflow/Data/400-ExternalProjects/430-SimpMC/433-SimpIssueHub/Backend/src/test/java/com/simpissuehub/application/IssueFilterQueryTest.java
+/Users/chroniflow/Data/400-ExternalProjects/430-SimpMC/433-SimpIssueHub/Backend/src/test/java/com/simpissuehub/application/IssuePollConcurrencyIntegrationTest.java
+/Users/chroniflow/Data/400-ExternalProjects/430-SimpMC/433-SimpIssueHub/Backend/src/test/java/com/simpissuehub/application/RegistrationVerificationServiceTest.java
+/Users/chroniflow/Data/400-ExternalProjects/430-SimpMC/433-SimpIssueHub/Backend/src/test/java/com/simpissuehub/application/TurnstileVerifierTest.java
+/Users/chroniflow/Data/400-ExternalProjects/430-SimpMC/433-SimpIssueHub/Backend/src/test/java/com/simpissuehub/application/image/IssueImageRendererTest.java
+/Users/chroniflow/Data/400-ExternalProjects/430-SimpMC/433-SimpIssueHub/Backend/src/test/java/com/simpissuehub/application/mail/IssueSubscriptionNotificationServiceTest.java
+/Users/chroniflow/Data/400-ExternalProjects/430-SimpMC/433-SimpIssueHub/Backend/src/test/java/com/simpissuehub/application/mail/MailTemplateRendererTest.java
+/Users/chroniflow/Data/400-ExternalProjects/430-SimpMC/433-SimpIssueHub/Backend/src/test/java/com/simpissuehub/cli/TuiCommandParserTest.java
+/Users/chroniflow/Data/400-ExternalProjects/430-SimpMC/433-SimpIssueHub/Backend/src/test/java/com/simpissuehub/cli/TuiCommandRunnerTest.java

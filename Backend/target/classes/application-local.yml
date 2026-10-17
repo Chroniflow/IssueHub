@@ -1,0 +1,94 @@
+spring:
+  main:
+    headless: true
+  datasource:
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/simp_issue_hub?serverTimezone=UTC&characterEncoding=UTF-8}
+    username: ${DB_USERNAME:chroniflow}
+    password: ${DB_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  mail:
+    host: ${SMTP_HOST:127.0.0.1}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    protocol: ${SMTP_PROTOCOL:smtp}
+    properties:
+      mail.smtp.auth: ${SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${SMTP_STARTTLS:false}
+      mail.smtp.ssl.enable: ${SMTP_SSL:false}
+      mail.smtp.connectiontimeout: ${SMTP_CONNECTION_TIMEOUT_MS:5000}
+      mail.smtp.timeout: ${SMTP_TIMEOUT_MS:5000}
+      mail.smtp.writetimeout: ${SMTP_WRITE_TIMEOUT_MS:5000}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  version: ${APP_VERSION:0.1.0-SNAPSHOT}
+  site:
+    icon-url: ${SITE_ICON_URL:}
+  security:
+    registration-verification:
+      required: ${EMAIL_VERIFICATION_REQUIRED:true}
+      ttl-seconds: ${EMAIL_VERIFICATION_TTL_SECONDS:600}
+      cooldown-seconds: ${EMAIL_VERIFICATION_COOLDOWN_SECONDS:60}
+      max-attempts: ${EMAIL_VERIFICATION_MAX_ATTEMPTS:5}
+      cleanup-interval-ms: ${EMAIL_VERIFICATION_CLEANUP_INTERVAL_MS:3600000}
+    turnstile:
+      secret-key: ${TURNSTILE_SECRET_KEY:}
+      expected-hostname: ${TURNSTILE_EXPECTED_HOSTNAME:}
+  tui:
+    enabled: ${TUI_ENABLED:false}
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173}
+  mail:
+    from: ${MAIL_FROM:no-reply@localhost}
+    public-base-url: ${MAIL_PUBLIC_BASE_URL:http://localhost:5173}
+    dispatch:
+      max-attempts: ${MAIL_MAX_ATTEMPTS:3}
+      backoff-ms: ${MAIL_RETRY_BACKOFF_MS:1000}
+    rules:
+      reply-creates-comment: ${MAIL_REPLY_CREATES_COMMENT:true}
+      issue-reference: ${MAIL_ISSUE_REFERENCE:SUBJECT_OR_IN_REPLY_TO}
+      require-sender-verification: ${MAIL_REQUIRE_SENDER_VERIFICATION:true}
+      deduplicate-by-message-id: ${MAIL_DEDUPLICATE_BY_MESSAGE_ID:true}
+    notifications:
+      issue-created: false
+      comment-created: ${MAIL_NOTIFY_COMMENT_CREATED:true}
+      state-changed: ${MAIL_NOTIFY_STATE_CHANGED:true}
+      mentioned: ${MAIL_NOTIFY_MENTIONED:true}
+      additional-recipients: ${MAIL_ADDITIONAL_RECIPIENTS:}
+    attachments:
+      max-bytes: ${MAIL_ATTACHMENT_MAX_BYTES:10485760}
+      mode: ${MAIL_ATTACHMENT_MODE:REJECT}
+    retention:
+      incoming-days: ${MAIL_INCOMING_RETENTION_DAYS:30}
+      outgoing-days: ${MAIL_OUTGOING_RETENTION_DAYS:90}
+    imap:
+      host: ${IMAP_HOST:127.0.0.1}
+      port: ${IMAP_PORT:143}
+      username: ${IMAP_USERNAME:}
+      password: ${IMAP_PASSWORD:}
+      protocol: ${IMAP_PROTOCOL:imap}
+      ssl: ${IMAP_SSL:false}
+      poll-interval: ${IMAP_POLL_INTERVAL_MS:60000}
+
+# Local development keeps the same token semantics as the default profile.
+sa-token:
+  token-name: ${SA_TOKEN_NAME:satoken}
+  timeout: ${SA_TOKEN_TIMEOUT:2592000}
+  active-timeout: ${SA_TOKEN_ACTIVE_TIMEOUT:1800}
+  is-concurrent: false
+  is-share: false
+  is-read-header: true
+  is-read-cookie: true
+  is-lasting-cookie: ${SA_TOKEN_LASTING_COOKIE:true}
+  cookie:
+    http-only: true
+    same-site: ${SA_TOKEN_COOKIE_SAME_SITE:Strict}
+    secure: ${SA_TOKEN_COOKIE_SECURE:false}

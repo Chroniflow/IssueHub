@@ -1,0 +1,46 @@
+@import './base.css';
+
+#app {
+  min-height: 100vh;
+}
+
+/* ---------- Material Design 点击波纹（v-ripple 指令） ---------- */
+.ih-ripple-host {
+  position: relative;
+  overflow: hidden;
+  /* 让波纹不溢出圆角，同时避免 iOS 上的点击高亮 */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 运行时插入的遮罩层：把波纹裁剪在宿主范围内。
+   它不参与 Vue 的 class 补丁，因此不会像 .ih-ripple-host 那样被激活态覆盖掉。 */
+.ih-ripple-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.ih-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--ih-c-wave);
+  opacity: 0.35;
+  transform: scale(0);
+  pointer-events: none;
+  animation: ih-ripple-expand 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes ih-ripple-expand {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ih-ripple {
+    animation-duration: 1ms;
+  }
+}

@@ -1,0 +1,13 @@
+com/simpissuehub/cli/TuiCommandParserTest.class
+com/simpissuehub/application/mail/IssueSubscriptionNotificationServiceTest.class
+com/simpissuehub/application/image/IssueImageRendererTest.class
+com/simpissuehub/application/AuthorizationServiceTest.class
+com/simpissuehub/api/ApiSecurityIntegrationTest.class
+com/simpissuehub/application/IssueAttachmentServiceTest.class
+com/simpissuehub/api/PollAuthorizationTest.class
+com/simpissuehub/application/RegistrationVerificationServiceTest.class
+com/simpissuehub/cli/TuiCommandRunnerTest.class
+com/simpissuehub/application/mail/MailTemplateRendererTest.class
+com/simpissuehub/application/TurnstileVerifierTest.class
+com/simpissuehub/api/IssueImageControllerTest.class
+com/simpissuehub/application/IssuePollConcurrencyIntegrationTest.class

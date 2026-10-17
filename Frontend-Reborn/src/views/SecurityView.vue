@@ -1,0 +1,171 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { changeEmail, changePassword, getApiErrorMessage, updateMyAvatar } from '@/api/http'
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+const auth = useAuthStore()
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+const saving = ref(false)
+const error = ref('')
+const email = ref(auth.user?.email ?? '')
+const emailPassword = ref('')
+const emailSaving = ref(false)
+const emailError = ref('')
+const emailSuccess = ref(false)
+const avatarUrl = ref(auth.user?.avatarUrl ?? '')
+const avatarSaving = ref(false)
+const avatarError = ref('')
+const avatarSuccess = ref(false)
+
+async function submit() {
+  error.value = ''
+  if (newPassword.value.length < 8) {
+    error.value = '新密码至少需要 8 个字符。'
+    return
+  }
+  if (newPassword.value !== confirmPassword.value) {
+    error.value = '两次输入的新密码不一致。'
+    return
+  }
+  saving.value = true
+  try {
+    await changePassword({ currentPassword: currentPassword.value, newPassword: newPassword.value })
+    auth.user = null
+    await router.replace({ path: '/login', query: { passwordChanged: '1' } })
+  } catch (requestError: unknown) {
+    error.value = getApiErrorMessage(requestError, '密码修改失败，请稍后重试。')
+  } finally {
+    saving.value = false
+  }
+}
+
+async function submitEmail() {
+  emailError.value = ''
+  emailSuccess.value = false
+  emailSaving.value = true
+  try {
+    const user = await changeEmail({ email: email.value.trim(), currentPassword: emailPassword.value })
+    auth.user = user
+    email.value = user.email
+    emailPassword.value = ''
+    emailSuccess.value = true
+  } catch (requestError: unknown) {
+    emailError.value = getApiErrorMessage(requestError, '邮箱修改失败，请稍后重试。')
+  } finally {
+    emailSaving.value = false
+  }
+}
+
+async function submitAvatar() {
+  avatarError.value = ''
+  avatarSuccess.value = false
+  const value = avatarUrl.value.trim()
+  if (value && !/^https?:\/\/\S+$/i.test(value)) {
+    avatarError.value = '头像地址必须是 http 或 https URL。'
+    return
+  }
+  avatarSaving.value = true
+  try {
+    const user = await updateMyAvatar(value || null)
+    auth.user = user
+    avatarUrl.value = user.avatarUrl ?? ''
+    avatarSuccess.value = true
+  } catch (requestError: unknown) {
+    avatarError.value = getApiErrorMessage(requestError, '头像保存失败，请稍后重试。')
+  } finally {
+    avatarSaving.value = false
+  }
+}
+</script>
+
+<template>
+  <main class="form-page compact">
+    <button v-ripple class="back-link" @click="router.push('/')">← 返回反馈列表</button>
+    <section class="form-panel">
+      <p class="eyebrow">ACCOUNT SECURITY</p>
+      <h1>账户安全</h1>
+      <p class="form-lede">管理登录密码、头像和账户邮箱。</p>
+      <form class="avatar-form" @submit.prevent="submitAvatar">
+        <h2>头像</h2>
+        <div class="avatar-preview">
+          <img
+            v-if="avatarUrl"
+            :src="avatarUrl"
+            alt="头像预览"
+            referrerpolicy="no-referrer"
+            @error="avatarUrl = ''"
+          />
+          <span v-else>{{ auth.user?.username.slice(0, 1) || '?' }}</span>
+        </div>
+        <label
+          >头像地址<input
+            v-model="avatarUrl"
+            type="url"
+            maxlength="512"
+            placeholder="https://example.com/avatar.png"
+            autocomplete="url"
+        /></label>
+        <small class="form-hint"
+          >仅保存图片地址；图片加载失败时会自动显示用户名首字母。清空地址可恢复默认头像。</small
+        >
+        <p v-if="avatarError" class="form-error">{{ avatarError }}</p>
+        <p v-if="avatarSuccess" class="form-message">头像已保存。</p>
+        <button v-ripple class="primary-button" type="submit" :disabled="avatarSaving">
+          {{ avatarSaving ? '保存中…' : '保存头像' }}
+        </button>
+      </form>
+      <form class="security-section" @submit.prevent="submit">
+        <h2>修改密码</h2>
+        <label
+          >当前密码<input
+            v-model="currentPassword"
+            type="password"
+            autocomplete="current-password"
+            required
+        /></label>
+        <label
+          >新密码<input
+            v-model="newPassword"
+            type="password"
+            minlength="8"
+            autocomplete="new-password"
+            required
+        /></label>
+        <label
+          >确认新密码<input
+            v-model="confirmPassword"
+            type="password"
+            minlength="8"
+            autocomplete="new-password"
+            required
+        /></label>
+        <p v-if="error" class="form-error">{{ error }}</p>
+        <button v-ripple class="primary-button" type="submit" :disabled="saving">
+          {{ saving ? '保存中…' : '修改密码' }}
+        </button>
+      </form>
+      <form class="security-section" @submit.prevent="submitEmail">
+        <h2>修改邮箱</h2>
+        <label
+          >新邮箱<input v-model="email" type="email" maxlength="254" autocomplete="email" required
+        /></label>
+        <label
+          >当前密码<input
+            v-model="emailPassword"
+            type="password"
+            autocomplete="current-password"
+            required
+        /></label>
+        <p v-if="emailError" class="form-error">{{ emailError }}</p>
+        <p v-if="emailSuccess" class="form-message">邮箱已修改。</p>
+        <button v-ripple class="primary-button" type="submit" :disabled="emailSaving">
+          {{ emailSaving ? '保存中…' : '修改邮箱' }}
+        </button>
+      </form>
+    </section>
+  </main>
+</template>

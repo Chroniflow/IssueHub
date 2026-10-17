@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.simpissuehub.application.IssuePollConcurrencyIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.841 s -- in com.simpissuehub.application.IssuePollConcurrencyIntegrationTest

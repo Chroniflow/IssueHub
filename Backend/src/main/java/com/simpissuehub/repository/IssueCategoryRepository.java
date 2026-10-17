@@ -1,0 +1,3 @@
+package com.simpissuehub.repository;
+import com.simpissuehub.domain.IssueCategory; import org.springframework.data.jpa.repository.*; import org.springframework.data.repository.query.Param; import java.util.*;
+public interface IssueCategoryRepository extends JpaRepository<IssueCategory,Long> { Optional<IssueCategory> findByName(String name); @Query(value="select count(*) from issues where category=:name and deleted=false",nativeQuery=true) long countIssues(@Param("name") String name); @Query(value="select count(*) from issues where category=:name and state='OPEN' and deleted=false",nativeQuery=true) long countOpenIssues(@Param("name") String name); }

@@ -1,0 +1,132 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend build and migrations
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:12.3
+        env:
+          MARIADB_DATABASE: simp_issue_hub
+          MARIADB_USER: simp_issue_hub
+          MARIADB_PASSWORD: ci_password
+          MARIADB_ROOT_PASSWORD: ci_root_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      DB_URL: jdbc:mysql://127.0.0.1:3306/simp_issue_hub?serverTimezone=UTC&characterEncoding=UTF-8
+      DB_USERNAME: simp_issue_hub
+      DB_PASSWORD: ci_password
+      TUI_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Compile and run backend tests
+        working-directory: Backend
+        run: mvn --batch-mode --no-transfer-progress verify
+      - name: Verify Flyway applied every migration
+        env:
+          MYSQL_PWD: ci_password
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes mariadb-client
+          expected=$(find Backend/src/main/resources/db/migration -type f -name 'V*__*.sql' | wc -l)
+          (cd Backend && mvn --batch-mode --no-transfer-progress spring-boot:run -Dspring-boot.run.arguments=--server.port=8080 >/tmp/simpissuehub-ci.log 2>&1) &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 60); do
+            curl --silent --fail http://127.0.0.1:8080/api/v1/health >/dev/null && break
+            sleep 2
+          done
+          applied=$(mariadb --host=127.0.0.1 --user=simp_issue_hub --batch --skip-column-names --execute="SELECT COUNT(*) FROM flyway_schema_history WHERE success = 1" simp_issue_hub)
+          test "$applied" -eq "$expected"
+
+  frontend:
+    name: Frontend check and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: Frontend/pnpm-lock.yaml
+      - name: Install locked dependencies
+        working-directory: Frontend
+        run: pnpm install --frozen-lockfile
+      - name: Type-check and build
+        working-directory: Frontend
+        run: pnpm build
+
+  dependency-scan:
+    name: Dependency vulnerability scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan Maven and pnpm manifests
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+  image-scan:
+    name: Container image scan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: backend
+            context: Backend
+          - name: frontend
+            context: Frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build local image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          pull: true
+          load: true
+          push: false
+          tags: simpissuehub-${{ matrix.name }}:ci
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+      - name: Scan image
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          image-ref: simpissuehub-${{ matrix.name }}:ci
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"

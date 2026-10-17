@@ -1,0 +1,150 @@
+spring:
+  application:
+    name: simp-issue-hub-backend
+  main:
+    headless: true
+  config:
+    import: optional:file:${SITE_CONFIG_FILE:./data/site-config.properties}
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/simp_issue_hub?serverTimezone=UTC&characterEncoding=UTF-8}
+    username: ${DB_USERNAME:chroniflow}
+    password: ${DB_PASSWORD:}
+  jpa:
+    open-in-view: false
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: ${ATTACHMENT_MAX_BYTES:10485760}
+      max-request-size: ${ATTACHMENT_MAX_REQUEST_BYTES:11534336}
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:1025}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    protocol: ${SMTP_PROTOCOL:smtp}
+    properties:
+      mail.smtp.auth: ${SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${SMTP_STARTTLS:false}
+      mail.smtp.ssl.enable: ${SMTP_SSL:false}
+      mail.smtp.connectiontimeout: ${SMTP_CONNECTION_TIMEOUT_MS:5000}
+      mail.smtp.timeout: ${SMTP_TIMEOUT_MS:5000}
+      mail.smtp.writetimeout: ${SMTP_WRITE_TIMEOUT_MS:5000}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  version: ${APP_VERSION:0.1.0-SNAPSHOT}
+  site:
+    icon-url: ${SITE_ICON_URL:}
+    about-content: ${SITE_ABOUT_CONTENT:SimpIssueHub 面向 Minecraft 服务器玩家，用于提交反馈、功能建议和 Bug 报告。\n\n登录后可查看每条反馈的处理状态。玩家可以查看讨论、补充复现信息，并与工作人员一起让服务器变得更好。}
+  attachments:
+    directory: ${ATTACHMENT_STORAGE_DIRECTORY:./data/attachments}
+    max-bytes: ${ATTACHMENT_MAX_BYTES:10485760}
+    allowed-extensions: ${ATTACHMENT_ALLOWED_EXTENSIONS:png,jpg,jpeg,gif,webp,mp4,webm,zip,pdf,txt,log}
+  security:
+    registration-verification:
+      required: ${EMAIL_VERIFICATION_REQUIRED:true}
+      ttl-seconds: ${EMAIL_VERIFICATION_TTL_SECONDS:600}
+      cooldown-seconds: ${EMAIL_VERIFICATION_COOLDOWN_SECONDS:60}
+      max-attempts: ${EMAIL_VERIFICATION_MAX_ATTEMPTS:5}
+      cleanup-interval-ms: ${EMAIL_VERIFICATION_CLEANUP_INTERVAL_MS:3600000}
+    turnstile:
+      secret-key: ${TURNSTILE_SECRET_KEY:}
+      expected-hostname: ${TURNSTILE_EXPECTED_HOSTNAME:}
+  tui:
+    enabled: ${TUI_ENABLED:false}
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173}
+  mail:
+    from: ${MAIL_FROM:no-reply@localhost}
+    public-base-url: ${MAIL_PUBLIC_BASE_URL:http://localhost:5173}
+    templates:
+      verification-code:
+        subject: "${MAIL_TEMPLATE_VERIFICATION_CODE_SUBJECT:[{{siteName}}] 注册验证码}"
+        body: "${MAIL_TEMPLATE_VERIFICATION_CODE_BODY:你的注册验证码是：{{verificationCode}}\\n\\n验证码在 {{expiresMinutes}} 分钟内有效，请勿转发给他人。}"
+      registration:
+        subject: "${MAIL_TEMPLATE_REGISTRATION_SUBJECT:[{{siteName}}] 欢迎加入}"
+        body: "${MAIL_TEMPLATE_REGISTRATION_BODY:你好，{{username}}：\\n\\n{{message}}}"
+      password-reset:
+        subject: "${MAIL_TEMPLATE_PASSWORD_RESET_SUBJECT:[{{siteName}}] 重置密码}"
+        body: "${MAIL_TEMPLATE_PASSWORD_RESET_BODY:你好，{{username}}：\\n\\n{{message}}}"
+      issue-created:
+        subject: "${MAIL_TEMPLATE_ISSUE_CREATED_SUBJECT:[{{siteName}}] 工单已创建 #{{issueId}}}"
+        body: "${MAIL_TEMPLATE_ISSUE_CREATED_BODY:你好，{{username}}：\\n\\n{{message}}\\n\\n工单编号：#{{issueId}}}"
+      comment-created:
+        subject: "${MAIL_TEMPLATE_COMMENT_CREATED_SUBJECT:[{{siteName}}] 工单 #{{issueId}} 收到新评论}"
+        body: "${MAIL_TEMPLATE_COMMENT_CREATED_BODY:你好，{{username}}：\\n\\n{{message}}\\n\\n工单编号：#{{issueId}}}"
+      issue-state-changed:
+        subject: "${MAIL_TEMPLATE_ISSUE_STATE_CHANGED_SUBJECT:[{{siteName}}] 工单状态更新 #{{issueId}}}"
+        body: "${MAIL_TEMPLATE_ISSUE_STATE_CHANGED_BODY:你好，{{username}}：\\n\\n{{message}}\\n\\n工单编号：#{{issueId}}}"
+      mentioned:
+        subject: "${MAIL_TEMPLATE_MENTIONED_SUBJECT:[{{siteName}}] 你在工单 #{{issueId}} 中被提及}"
+        body: "${MAIL_TEMPLATE_MENTIONED_BODY:你好，{{username}}：\\n\\n{{message}}\\n\\n工单编号：#{{issueId}}}"
+    dispatch:
+      max-attempts: ${MAIL_MAX_ATTEMPTS:3}
+      backoff-ms: ${MAIL_RETRY_BACKOFF_MS:1000}
+    rules:
+      reply-creates-comment: ${MAIL_REPLY_CREATES_COMMENT:true}
+      issue-reference: ${MAIL_ISSUE_REFERENCE:SUBJECT_OR_IN_REPLY_TO}
+      require-sender-verification: ${MAIL_REQUIRE_SENDER_VERIFICATION:true}
+      deduplicate-by-message-id: ${MAIL_DEDUPLICATE_BY_MESSAGE_ID:true}
+    notifications:
+      issue-created: false
+      comment-created: ${MAIL_NOTIFY_COMMENT_CREATED:true}
+      state-changed: ${MAIL_NOTIFY_STATE_CHANGED:true}
+      mentioned: ${MAIL_NOTIFY_MENTIONED:true}
+      additional-recipients: ${MAIL_ADDITIONAL_RECIPIENTS:}
+    attachments:
+      max-bytes: ${MAIL_ATTACHMENT_MAX_BYTES:10485760}
+      mode: ${MAIL_ATTACHMENT_MODE:REJECT}
+    retention:
+      incoming-days: ${MAIL_INCOMING_RETENTION_DAYS:30}
+      outgoing-days: ${MAIL_OUTGOING_RETENTION_DAYS:90}
+    imap:
+      host: ${IMAP_HOST:localhost}
+      port: ${IMAP_PORT:143}
+      username: ${IMAP_USERNAME:}
+      password: ${IMAP_PASSWORD:}
+      protocol: ${IMAP_PROTOCOL:imap}
+      ssl: ${IMAP_SSL:false}
+      poll-interval: ${IMAP_POLL_INTERVAL_MS:60000}
+
+sa-token:
+  # 浏览器会话支持 Cookie 与 satoken Header；Authorization Bearer 仅用于 API Token。
+  token-name: ${SA_TOKEN_NAME:satoken}
+  timeout: ${SA_TOKEN_TIMEOUT:2592000}
+  active-timeout: ${SA_TOKEN_ACTIVE_TIMEOUT:1800}
+  is-concurrent: false
+  is-share: false
+  is-read-header: true
+  is-read-cookie: true
+  # 必须写入带 Max-Age 的持久 Cookie，否则关闭浏览器后登录态会丢失。
+  is-lasting-cookie: ${SA_TOKEN_LASTING_COOKIE:true}
+  cookie:
+    http-only: true
+    same-site: ${SA_TOKEN_COOKIE_SAME_SITE:Strict}
+    secure: ${SA_TOKEN_COOKIE_SECURE:false}
+  # 默认使用单实例内存会话；多实例部署时通过 Sa-Token Dao 扩展切换 Redis。
+  dao: memory
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  pattern:
+    console: '{"time":"%d{yyyy-MM-dd''T''HH:mm:ss.SSSXXX}","level":"%level","logger":"%logger{36}","request_id":"%X{requestId}","message":"%replace(%msg){''"'',''\\"''}"}%n'
